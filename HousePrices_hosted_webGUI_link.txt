@@ -1,0 +1,6 @@
+Name: Oluwadamilola Ale
+Matric Number: 22CH031991
+Machine Learning Algorithm Used: K-Nearest Neighbours (KNN)
+Model Persistence Method Used: Joblib
+Live URL: https://titanicproject1.streamlit.app/
+GitHub Repository Link: https://github.com/Damilola-Ale/Titanic_Project_OluwadamilolaAle_22CH031991
