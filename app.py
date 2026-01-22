@@ -1,66 +1,62 @@
+# ==============================
+# House Price Prediction System
+# ==============================
+
 import streamlit as st
 import numpy as np
 import pandas as pd
 import joblib
 
 # -------------------------------
-# Load trained model
+# Load the trained model
 # -------------------------------
-data = joblib.load("model/titanic_survival_model.pkl")
-
+data = joblib.load("model/house_price_model.pkl")
 model = data["model"]
-scaler = data["scaler"]
-feature_columns = data["feature_columns"]  # Ensures exact order used during training
+scaler = data.get("scaler", None)  # in case you scaled features
+feature_columns = data["feature_columns"]
 
 # -------------------------------
 # App Title
 # -------------------------------
-st.title("🚢 Titanic Survival Prediction System")
-
+st.title("🏠 House Price Prediction System")
 st.write(
-    "Enter passenger details below to predict whether the passenger survived the Titanic disaster."
+    "Enter the house details below to predict the house price."
 )
 
 # -------------------------------
 # User Inputs
 # -------------------------------
-pclass = st.selectbox("Passenger Class (Pclass)", [1, 2, 3])
-age = st.number_input("Age", min_value=0.0, max_value=100.0, value=30.0)
-fare = st.number_input("Fare", min_value=0.0, value=32.0)
-
-sex = st.selectbox("Sex", ["male", "female"])
-embarked = st.selectbox("Port of Embarkation", ["C", "Q", "S"])
-
-# Encode categorical inputs exactly like during training
-sex_male = 1 if sex == "male" else 0
-embarked_Q = 1 if embarked == "Q" else 0
-embarked_S = 1 if embarked == "S" else 0
+# Replace these with the 6 features you selected
+overall_qual = st.selectbox("Overall Quality (OverallQual)", list(range(1, 11)), index=5)
+gr_liv_area = st.number_input("Above Ground Living Area (GrLivArea in sq.ft.)", min_value=200.0, value=1500.0)
+total_bsmt_sf = st.number_input("Total Basement Area (TotalBsmtSF in sq.ft.)", min_value=0.0, value=800.0)
+garage_cars = st.number_input("Number of Garage Cars (GarageCars)", min_value=0, value=2)
+bedroom_abvgr = st.number_input("Number of Bedrooms Above Ground (BedroomAbvGr)", min_value=0, value=3)
+full_bath = st.number_input("Number of Full Bathrooms (FullBath)", min_value=0, value=2)
 
 # -------------------------------
 # Predict Button
 # -------------------------------
-if st.button("Predict Survival"):
-    # Arrange input in the same order as feature_columns
-    input_df = pd.DataFrame([[
-        pclass,
-        age,
-        fare,
-        sex_male,
-        embarked_Q,
-        embarked_S
-    ]], columns=feature_columns)
+if st.button("Predict Price"):
+    # Arrange inputs in the SAME ORDER as used during training
+    input_data = np.array([
+        overall_qual,
+        gr_liv_area,
+        total_bsmt_sf,
+        garage_cars,
+        bedroom_abvgr,
+        full_bath
+    ]).reshape(1, -1)
 
-    # Scale input
-    input_scaled = scaler.transform(input_df)
+    # Scale input if scaler exists
+    if scaler:
+        input_data = scaler.transform(input_data)
 
     # Make prediction
-    prediction = model.predict(input_scaled)[0]
+    predicted_price = model.predict(input_data)[0]
 
     # Display result
-    if prediction == 1:
-        st.success("✅ Prediction: Survived")
-    else:
-        st.error("❌ Prediction: Did Not Survive")
+    st.success(f"🏡 Predicted House Price: ${predicted_price:,.2f}")
 
 # -------------------------------
 # Disclaimer
@@ -69,6 +65,6 @@ st.markdown(
     """
     ---
     **Note:**  
-    This system is developed strictly for educational purposes and should not be used for real-world decision making.
+    This system is developed strictly for educational purposes and should not be used for actual financial decisions.
     """
 )
